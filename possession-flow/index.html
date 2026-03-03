@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Possession Flow — Prototype</title>
+  <link rel="stylesheet" href="possession-flow.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <nav id="game-picker">
+      <label for="game-select">Game:</label>
+      <select id="game-select"></select>
+    </nav>
+    <div id="chart-container"></div>
+  </div>
+  <script src="possession-flow.js"></script>
+  <script>
+    const GAMES = [
+      { file: 'data/2024-12-21-notre-dame-indiana.json', label: 'CFP First Round — Notre Dame vs Indiana' },
+      { file: 'data/2025-01-02-notre-dame-georgia.json', label: 'CFP Quarterfinal — Notre Dame vs Georgia' },
+      { file: 'data/2025-01-10-notre-dame-penn-state.json', label: 'CFP Semifinal — Notre Dame vs Penn State' },
+      { file: 'data/2025-01-20-ohio-state-notre-dame.json', label: 'CFP Championship — Ohio State vs Notre Dame' },
+      { file: 'data/2026-01-19-indiana-miami.json', label: '2026 CFP Championship — Indiana vs Miami' }
+    ];
+
+    const sel = document.getElementById('game-select');
+    GAMES.forEach((g, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = g.label;
+      sel.appendChild(opt);
+    });
+
+    function loadGame(idx) {
+      fetch(GAMES[idx].file)
+        .then(r => r.json())
+        .then(data => renderPossessionFlow('#chart-container', data));
+    }
+
+    sel.addEventListener('change', () => loadGame(+sel.value));
+    loadGame(0);
+  </script>
+</body>
+</html>
