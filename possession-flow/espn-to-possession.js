@@ -102,11 +102,14 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
       'Fumble Recovery (Own)', 'Blocked Field Goal',
       'Blocked Punt',
     ]);
-    // On a turnover, ESPN's end.yardsToEndzone reflects the *new* possessor's
+    // On a turnover (or FGA), ESPN's end.yardsToEndzone reflects the *new* possessor's
     // perspective (e.g. ASU at own 8 = 92). We need the drive end from the
     // *offensive* team's perspective, so use start for the last play.
     // (PUNT excluded: we skip the punt play and use the prior play's end.)
-    const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE']);
+    // FGA: on a missed FG, the ball goes to the opponent; end position is from their
+    // perspective. The drive ended at the spot of the kick = start of the FG attempt.
+    // ESPN returns "MISSED FG" in drive.result, not "FGA".
+    const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE', 'FGA', 'MISSED FG']);
     const isTurnover = turnoverResults.has(drive.result || '');
     for (let i = plays.length - 1; i >= 0; i--) {
       const p = plays[i];
