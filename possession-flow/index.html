@@ -12,9 +12,16 @@
     <nav id="game-picker">
       <label for="game-select">Game:</label>
       <select id="game-select"></select>
+      <span class="picker-sep">or</span>
+      <div class="espn-explore">
+        <input type="text" id="espn-input" placeholder="ESPN game URL or ID" />
+        <button type="button" id="espn-load">Load from ESPN</button>
+      </div>
     </nav>
+    <div id="espn-status" class="status-message" aria-live="polite"></div>
     <div id="chart-container"></div>
   </div>
+  <script src="espn-to-possession.js"></script>
   <script src="possession-flow.js"></script>
   <script>
     const GAMES = [
@@ -26,6 +33,60 @@
     ];
 
     const sel = document.getElementById('game-select');
+    const espnInput = document.getElementById('espn-input');
+    const espnLoad = document.getElementById('espn-load');
+    const espnStatus = document.getElementById('espn-status');
+    const chartContainer = document.getElementById('chart-container');
+
+    function addGameOption(game, isFetched = false) {
+      const label = `${game.title} — ${game.teamA.name} vs ${game.teamB.name}`;
+      const idx = GAMES.length;
+      GAMES.push({ file: null, label, data: game, isFetched });
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = label + (isFetched ? ' (fetched)' : '');
+      sel.appendChild(opt);
+      sel.value = idx;
+      return idx;
+    }
+
+    function showStatus(msg, type = '') {
+      espnStatus.textContent = msg;
+      espnStatus.className = 'status-message' + (type ? ' status-' + type : '');
+    }
+
+    function loadGame(idx) {
+      const g = GAMES[idx];
+      if (g.data) {
+        renderPossessionFlow('#chart-container', g.data);
+      } else {
+        fetch(g.file)
+          .then(r => r.json())
+          .then(data => renderPossessionFlow('#chart-container', data))
+          .catch(err => showStatus('Failed to load game: ' + err.message, 'error'));
+      }
+    }
+
+    async function loadFromESPN() {
+      const input = espnInput.value.trim();
+      if (!input) {
+        showStatus('Enter an ESPN game URL or ID', 'error');
+        return;
+      }
+      espnLoad.disabled = true;
+      showStatus('Fetching game data…', 'loading');
+      try {
+        const game = await espnToPossession.fetchAndConvert(input);
+        showStatus('');
+        addGameOption(game, true);
+        loadGame(GAMES.length - 1);
+      } catch (err) {
+        showStatus('Error: ' + (err.message || 'Could not fetch game. Try a different URL or check CORS.'), 'error');
+      } finally {
+        espnLoad.disabled = false;
+      }
+    }
+
     GAMES.forEach((g, i) => {
       const opt = document.createElement('option');
       opt.value = i;
@@ -33,13 +94,10 @@
       sel.appendChild(opt);
     });
 
-    function loadGame(idx) {
-      fetch(GAMES[idx].file)
-        .then(r => r.json())
-        .then(data => renderPossessionFlow('#chart-container', data));
-    }
-
     sel.addEventListener('change', () => loadGame(+sel.value));
+    espnLoad.addEventListener('click', loadFromESPN);
+    espnInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadFromESPN(); });
+
     loadGame(0);
   </script>
 </body>

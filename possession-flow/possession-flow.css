@@ -17,9 +17,70 @@ body {
 #game-picker {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   padding: 0 4px;
+}
+
+.picker-sep {
+  font-size: 12px;
+  color: #999;
+  margin: 0 4px;
+}
+
+.espn-explore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#espn-input {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 260px;
+}
+
+#espn-input:focus {
+  outline: none;
+  border-color: #888;
+}
+
+#espn-load {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 4px 12px;
+  border: 1px solid #2c3e6b;
+  border-radius: 4px;
+  background: #2c3e6b;
+  color: #fff;
+  cursor: pointer;
+}
+
+#espn-load:hover:not(:disabled) {
+  background: #1a2a4a;
+}
+
+#espn-load:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#espn-status {
+  padding: 4px 4px 12px;
+  font-size: 13px;
+  min-height: 1.4em;
+}
+
+#espn-status.status-loading {
+  color: #666;
+}
+
+#espn-status.status-error {
+  color: #c0392b;
 }
 
 #game-picker label {
