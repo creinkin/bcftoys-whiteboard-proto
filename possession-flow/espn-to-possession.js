@@ -94,6 +94,11 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
       break;
     }
   } else if (plays.length && pos === 'end') {
+    // Split punt/FG block drives: drive has no Punt play (removed with block), but end.yardsToEndzone is set to block spot
+    const lastType = plays.length ? ((plays[plays.length - 1].type || {}).text || '') : '';
+    if (drive.result === 'PUNT' && lastType !== 'Punt' && drive.end && drive.end.yardsToEndzone > 0) {
+      return drive.end.yardsToEndzone;
+    }
     const skipEnd = new Set([
       'Timeout', 'End of Half', 'End of Game', 'Penalty',
       'Kickoff', 'Kickoff Return (Offense)',
@@ -102,14 +107,11 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
       'Fumble Recovery (Own)', 'Blocked Field Goal',
       'Blocked Punt',
     ]);
-    // On a turnover (or FGA), ESPN's end.yardsToEndzone reflects the *new* possessor's
-    // perspective (e.g. ASU at own 8 = 92). We need the drive end from the
-    // *offensive* team's perspective, so use start for the last play.
-    // (PUNT excluded: we skip the punt play and use the prior play's end.)
-    // FGA: on a missed FG, the ball goes to the opponent; end position is from their
-    // perspective. The drive ended at the spot of the kick = start of the FG attempt.
-    // ESPN returns "MISSED FG" in drive.result, not "FGA".
-    const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE', 'FGA', 'MISSED FG']);
+    // On a turnover (or FGA or PUNT), ESPN's end.yardsToEndzone reflects the *new* possessor's
+    // perspective. We need the drive end from the *offensive* team's perspective.
+    // FGA: use start of FG attempt (spot of kick). PUNT: use start of punt (spot of kick),
+    // not end (where ball landed / receiving team got it).
+    const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE', 'FGA', 'MISSED FG', 'PUNT']);
     const isTurnover = turnoverResults.has(drive.result || '');
     const halfEndResults = new Set(['END OF HALF', 'END OF GAME']);
     const isHalfEnd = halfEndResults.has(drive.result || '');
@@ -120,6 +122,18 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
       // Use its start (ball position when clock hit 0) instead of skipping it.
       // ESPN uses "End Period" for end-of-half (not "End of Half").
       if (isHalfEnd && (ptype === 'End of Half' || ptype === 'End of Game' || ptype === 'End Period')) {
+        const yte = (p.start && p.start.yardsToEndzone) || 0;
+        if (yte > 0) return yte;
+        break;
+      }
+      // For PUNT drives, use the Punt play's start (spot of kick) — don't skip it
+      if (drive.result === 'PUNT' && ptype === 'Punt') {
+        const yte = (p.start && p.start.yardsToEndzone) || 0;
+        if (yte > 0) return yte;
+        break;
+      }
+      // For Blocked Punt / Blocked FG (no TD), use the block play's start (spot of block)
+      if ((ptype === 'Blocked Punt' || ptype === 'Blocked Field Goal')) {
         const yte = (p.start && p.start.yardsToEndzone) || 0;
         if (yte > 0) return yte;
         break;
@@ -173,8 +187,10 @@ function getScoresAfterDrive(drive) {
 function isSpecialTeamsTd(drive) {
   const result = drive.result || '';
   if (result.includes('END OF HALF') && result.includes('TD')) return true;
-  const offPlays = drive.offensivePlays || 0;
   const plays = drive.plays || [];
+  const lastType = plays.length ? ((plays[plays.length - 1].type || {}).text || '') : '';
+  if (lastType === 'Blocked Punt Touchdown' || lastType === 'Blocked Field Goal Touchdown') return true;
+  const offPlays = drive.offensivePlays || 0;
   if (offPlays === 0 && plays.length) {
     if (result === 'TD') return true;
     for (const p of plays) {
@@ -185,6 +201,52 @@ function isSpecialTeamsTd(drive) {
     }
   }
   return false;
+}
+
+/**
+ * Split drives that end in a blocked punt/FG returned for TD.
+ * ESPN bundles the punt team's drive + block + return into one drive.
+ * Split into: (1) punt drive ending at spot of block, (2) ST Poss (return TD).
+ */
+function splitBlockedPuntTdDrives(drives) {
+  const result = [];
+  for (const drv of drives) {
+    const plays = drv.plays || [];
+    const lastPlay = plays[plays.length - 1];
+    const lastType = (lastPlay && lastPlay.type && lastPlay.type.text) || '';
+    const isBlockedPuntTd = lastType === 'Blocked Punt Touchdown';
+    const isBlockedFgTd = lastType === 'Blocked Field Goal Touchdown';
+
+    if (!isBlockedPuntTd && !isBlockedFgTd) {
+      result.push(drv);
+      continue;
+    }
+
+    const blockStart = lastPlay.start && lastPlay.start.yardsToEndzone;
+    if (!blockStart || blockStart <= 0) {
+      result.push(drv);
+      continue;
+    }
+
+    const puntPlays = plays.slice(0, -1);
+    const puntOffPlays = puntPlays.filter(p => {
+      const t = (p.type && p.type.text) || '';
+      return !['Kickoff', 'Kickoff Return (Offense)', 'Punt', 'Punt Return (Offense)'].includes(t);
+    });
+    const puntYards = puntOffPlays.reduce((s, p) => s + ((p.statYardage != null) ? p.statYardage : 0), 0);
+
+    const puntDrive = {
+      ...drv,
+      plays: puntPlays,
+      result: 'PUNT',
+      offensivePlays: puntOffPlays.length,
+      yards: puntYards,
+      end: { ...(drv.end || {}), yardsToEndzone: blockStart, text: lastPlay.start?.possessionText || drv.end?.text },
+    };
+
+    result.push(puntDrive, drv);
+  }
+  return result;
 }
 
 /**
@@ -292,7 +354,8 @@ function convertGame(data) {
   const teamA = winner;
   const teamB = loser;
 
-  const drives = splitCrossHalfDrives((data.drives && data.drives.previous) || []);
+  let drives = splitCrossHalfDrives((data.drives && data.drives.previous) || []);
+  drives = splitBlockedPuntTdDrives(drives);
   const possessions = [];
   let gp = 0;
   let prevDrive = null;
@@ -336,10 +399,20 @@ function convertGame(data) {
     let yds = drv.yards;
 
     if (stPoss) {
-      sy = null;
-      ey = null;
       offPlays = null;
       yds = null;
+      const lastType = (drv.plays && drv.plays.length) ? ((drv.plays[drv.plays.length - 1].type || {}).text || '') : '';
+      const isPuntBlock = lastType === 'Blocked Punt Touchdown' || lastType === 'Blocked Field Goal Touchdown';
+      if (isPuntBlock) {
+        const plays = drv.plays || [];
+        const lastPlay = plays[plays.length - 1];
+        const blockYte = lastPlay && lastPlay.start && lastPlay.start.yardsToEndzone;
+        sy = (blockYte > 0) ? blockYte : null;
+        ey = 0;
+      } else {
+        sy = null;
+        ey = null;
+      }
     } else if (espnResult === 'TD') {
       ey = 0;
     }
@@ -350,7 +423,9 @@ function convertGame(data) {
     let exchange = getExchangeType(drv, prevDrive, isHalfOpener);
     if (stPoss && !isHalfOpener) {
       const fp = firstPlayType(drv);
-      if (fp.includes('Kickoff')) exchange = 'KO Ret';
+      const lastType = (drv.plays && drv.plays.length) ? ((drv.plays[drv.plays.length - 1].type || {}).text || '') : '';
+      if (lastType === 'Blocked Punt Touchdown' || lastType === 'Blocked Field Goal Touchdown') exchange = 'Punt Block';
+      else if (fp.includes('Kickoff')) exchange = 'KO Ret';
       else if (fp.includes('Punt')) exchange = 'Punt Block';
       else if (prevDrive) exchange = EXCHANGE_FROM_PREV_RESULT[prevDrive.result] || 'KO';
     }
@@ -403,11 +478,25 @@ function outputFilename(game) {
 /**
  * Fetch an ESPN game and convert to possession-flow format.
  * @param {string} input - ESPN game ID or full URL
+ * @param {{ saveDebug?: boolean }} opts - If saveDebug: true (and running in Node), saves raw API + converted JSON to data/debug-{gameId}-*.json
  * @returns {Promise<object>} Possession-flow game object
  */
-async function fetchAndConvert(input) {
+async function fetchAndConvert(input, opts = {}) {
   const gameId = extractGameId(input);
   const raw = await fetchGame(gameId);
+  if (opts.saveDebug && typeof require !== 'undefined') {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const dir = path.join(__dirname, 'data');
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, `debug-${gameId}-raw.json`), JSON.stringify(raw, null, 2));
+      const converted = convertGame(raw);
+      fs.writeFileSync(path.join(dir, `debug-${gameId}-converted.json`), JSON.stringify(converted, null, 2));
+    } catch (e) {
+      console.warn('saveDebug failed:', e.message);
+    }
+  }
   return convertGame(raw);
 }
 

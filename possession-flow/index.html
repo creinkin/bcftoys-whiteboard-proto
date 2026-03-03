@@ -97,6 +97,19 @@
       }
       const gameId = espnToPossession.extractGameId(raw);
       espnLoad.disabled = true;
+      showStatus('Loading…', 'loading');
+      try {
+        const debugFile = `data/debug-${gameId}-converted.json`;
+        const r = await fetch(debugFile);
+        if (r.ok) {
+          const game = await r.json();
+          showStatus('Loaded from local cache (debug)');
+          addGameOption(game, gameId);
+          loadGame(GAMES.length - 1);
+          espnLoad.disabled = false;
+          return;
+        }
+      } catch (_) {}
       showStatus('Fetching game data…', 'loading');
       try {
         const game = await espnToPossession.fetchAndConvert(gameId);

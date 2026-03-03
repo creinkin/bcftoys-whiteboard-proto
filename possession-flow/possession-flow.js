@@ -22,7 +22,7 @@ function renderPossessionFlow(containerSelector, gameData) {
     scoring: '#2c3e6b',
     normal: '#aaa',
     negative: '#d35400',
-    fg: '#4a7fb5',
+    fg: '#6b9fd4',
     startDot: '#666',
     grid: '#e8e8e8',
     exch: '#c8c8c8',
@@ -164,7 +164,7 @@ function renderPossessionFlow(containerSelector, gameData) {
     const curr = possessions[i];
 
     if (prev.half !== curr.half) continue;
-    if (prev.type === 'ST Poss') continue;
+    if (prev.type === 'ST Poss' && curr.exchangeType !== 'KO') continue;
 
     if (curr.exchangeType === 'Punt Block') {
       const mx = (xGP(prev.gp) + xGP(curr.gp)) / 2;
@@ -175,19 +175,16 @@ function renderPossessionFlow(containerSelector, gameData) {
     }
 
     const x1 = xGP(prev.gp), x2 = xGP(curr.gp);
-    const y1 = yS(chartY(prev.ey, prev.team));
+    const y1 = prev.type === 'ST Poss'
+      ? (prev.team === teamA.name ? yS(0) : yS(100))
+      : yS(chartY(prev.ey, prev.team));
     const y2 = yS(chartY(curr.sy, curr.team));
     const midX = (x1 + x2) / 2;
 
     if (curr.exchangeType === 'KO') {
-      // Kickoff: vertical from score through KO waypoint, then curve to next drive
+      // Kickoff: KO waypoint, then curve to next drive
       const koChartPos = chartY(65, prev.team);
       const koY = yS(koChartPos);
-
-      // Vertical dashed line from score endpoint to KO point
-      const p1 = d3.path();
-      p1.moveTo(midX, y1);
-      exchG.append('path').attr('class', 'exchange-curve').attr('d', p1.toString());
 
       // KO circle + label
       exchG.append('circle').attr('class', 'exchange-circle').attr('cx', midX).attr('cy', koY).attr('r', 3.5);
@@ -252,6 +249,8 @@ function renderPossessionFlow(containerSelector, gameData) {
     const g = drvG.append('g').attr('class', 'drive-group').attr('data-gp', pb.gp);
 
     const isHalfOpener = !prev || prev.half !== pb.half;
+    const isPuntBlock = pb.exchangeType === 'Punt Block' && prev;
+    let fromY;
     if (isHalfOpener) {
       const kicker = pb.opponent;
       const koChartPos = chartY(65, kicker);
@@ -263,13 +262,15 @@ function renderPossessionFlow(containerSelector, gameData) {
       exchG.append('text').attr('class', 'exchange-label')
         .attr('x', koX).attr('y', koLabelY).attr('text-anchor', 'middle').text('KO');
 
-      g.append('line').attr('x1', x).attr('x2', x).attr('y1', koY).attr('y2', toY)
-        .attr('stroke', C.scoring).attr('stroke-width', 2.5).attr('stroke-dasharray', '5,3');
+      fromY = koY;
+    } else if (isPuntBlock && prev.ey != null) {
+      // Block spot = where punt drive ended. Use prev.team so line starts at punt drive's end (connects visually).
+      fromY = yS(chartY(prev.ey, prev.team));
     } else {
-      const fromY = yS(chartY(prev.ey, prev.team));
-      g.append('line').attr('x1', x).attr('x2', x).attr('y1', fromY).attr('y2', toY)
-        .attr('stroke', C.scoring).attr('stroke-width', 2.5).attr('stroke-dasharray', '5,3');
+      fromY = yS(chartY(prev.ey, prev.team));
     }
+    g.append('line').attr('x1', x).attr('x2', x).attr('y1', fromY).attr('y2', toY)
+      .attr('stroke', C.scoring).attr('stroke-width', 2.5).attr('stroke-dasharray', '5,3');
 
     g.append('circle').attr('cx', x).attr('cy', toY).attr('r', 4).attr('fill', C.scoring);
     const ty = pb.team === teamA.name ? yS(0) - 8 : yS(100) + 12;
@@ -306,10 +307,18 @@ function renderPossessionFlow(containerSelector, gameData) {
     svg.append('text').attr('class', 'ticker-text').attr('x', x).attr('y', tY + tickerRowHeight + 10).text(ab);
 
     const lChg = !prev || p.loserScore !== prev.loserScore;
-    svg.append('text').attr('class', `ticker-text ${lChg ? 'score-changed' : ''}`).attr('x', x).attr('y', tY + tickerRowHeight * 2 + 16).text(p.loserScore);
+    const lDelta = lChg ? (prev ? p.loserScore - prev.loserScore : p.loserScore) : 0;
+    const lFill = lChg && lDelta === 3 ? C.fg : (lChg && lDelta >= 6 ? C.scoring : null);
+    svg.append('text').attr('class', `ticker-text ${lChg ? 'score-changed' : ''}`)
+      .attr('x', x).attr('y', tY + tickerRowHeight * 2 + 16)
+      .style('fill', lFill).text(p.loserScore);
 
     const wChg = !prev || p.winnerScore !== prev.winnerScore;
-    svg.append('text').attr('class', `ticker-text ${wChg ? 'score-changed' : ''}`).attr('x', x).attr('y', tY + tickerRowHeight * 3 + 16).text(p.winnerScore);
+    const wDelta = wChg ? (prev ? p.winnerScore - prev.winnerScore : p.winnerScore) : 0;
+    const wFill = wChg && wDelta === 3 ? C.fg : (wChg && wDelta >= 6 ? C.scoring : null);
+    svg.append('text').attr('class', `ticker-text ${wChg ? 'score-changed' : ''}`)
+      .attr('x', x).attr('y', tY + tickerRowHeight * 3 + 16)
+      .style('fill', wFill).text(p.winnerScore);
   });
 
   svg.append('text').attr('class', 'ticker-label')
