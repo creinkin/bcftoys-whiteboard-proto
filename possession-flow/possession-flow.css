@@ -154,7 +154,7 @@ body {
 }
 
 .drive-line {
-  stroke-width: 2.5;
+  stroke-width: 3.25;
   stroke-linecap: round;
   cursor: pointer;
   transition: opacity 0.2s;

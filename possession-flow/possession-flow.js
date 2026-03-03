@@ -12,7 +12,7 @@ function renderPossessionFlow(containerSelector, gameData) {
   const halfGap = 28;
   const h2First = possessions.find(p => p.half === 2);
   const fieldWidthWithGap = fieldWidth + (h2First ? halfGap : 0);
-  const fieldHeight = 400;
+  const fieldHeight = 340;
   const tickerRowHeight = 13;
   const tickerPad = 12;
   const chartW = margin.left + fieldWidthWithGap + margin.right;
@@ -23,6 +23,7 @@ function renderPossessionFlow(containerSelector, gameData) {
     normal: '#aaa',
     negative: '#d35400',
     fg: '#4a7fb5',
+    startDot: '#666',
     grid: '#e8e8e8',
     exch: '#c8c8c8',
     bg: '#fff'
@@ -42,7 +43,8 @@ function renderPossessionFlow(containerSelector, gameData) {
   };
 
   function driveCol(p) {
-    if (p.result === '7' || p.result === '3') return C.scoring;
+    if (p.result === '7') return C.scoring;
+    if (p.result === '3') return C.fg;
     if (p.yards !== null && p.yards < 0) return C.negative;
     return C.normal;
   }
@@ -220,7 +222,7 @@ function renderPossessionFlow(containerSelector, gameData) {
 
     const g = drvG.append('g').attr('class', 'drive-group').attr('data-gp', p.gp).style('opacity', op);
     g.append('line').attr('class', 'drive-line').attr('x1', x).attr('x2', x).attr('y1', y1).attr('y2', y2).attr('stroke', col);
-    g.append('circle').attr('class', 'drive-dot').attr('cx', x).attr('cy', y1).attr('r', 4).attr('fill', col);
+    g.append('circle').attr('class', 'drive-dot').attr('cx', x).attr('cy', y1).attr('r', 4).attr('fill', C.startDot);
     g.append('circle').attr('class', 'drive-dot').attr('cx', x).attr('cy', y2).attr('r', 4).attr('fill', col);
 
     // Result label at the terminating dot
@@ -229,7 +231,7 @@ function renderPossessionFlow(containerSelector, gameData) {
       const ty = goesUp ? yS(0) - 8 : yS(100) + 12;
       g.append('text').attr('class', 'scoring-annotation').attr('x', x).attr('y', ty).attr('fill', C.scoring).text('TD');
     } else if (p.result === '3') {
-      g.append('text').attr('class', 'scoring-annotation').attr('x', x).attr('y', y2 + (goesUp ? -8 : 14)).attr('fill', C.scoring).text('FG');
+      g.append('text').attr('class', 'scoring-annotation').attr('x', x).attr('y', y2 + (goesUp ? -8 : 14)).attr('fill', C.fg).text('FG');
     } else if (p.result === 'H') {
       g.append('text').attr('class', 'drive-result-label').attr('x', x).attr('y', y2 + (goesUp ? -8 : 12))
         .attr('fill', p.isGarbage ? C.negative : '#999').text('Half');
