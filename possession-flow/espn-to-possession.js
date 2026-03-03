@@ -138,6 +138,18 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
         if (yte > 0) return yte;
         break;
       }
+      // For INT: use Pass Interception Return start (spot of interception)
+      if (drive.result === 'INT' && ptype === 'Pass Interception Return') {
+        const yte = (p.start && p.start.yardsToEndzone) || 0;
+        if (yte > 0) return yte;
+        break;
+      }
+      // For FUMBLE: use Fumble Recovery start (spot of fumble/recovery)
+      if (drive.result === 'FUMBLE' && (ptype === 'Fumble Recovery (Opponent)' || ptype === 'Fumble Recovery (Own)')) {
+        const yte = (p.start && p.start.yardsToEndzone) || 0;
+        if (yte > 0) return yte;
+        break;
+      }
       if (skipEnd.has(ptype)) continue;
       if (p.scoringPlay) {
         const yte = (p.start && p.start.yardsToEndzone) || 0;
