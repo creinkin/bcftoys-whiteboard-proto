@@ -1,0 +1,258 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #fff;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+#app {
+  max-width: 1100px;
+  width: 100%;
+}
+
+#game-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+#game-picker label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+#game-select {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fafafa;
+  color: #333;
+  cursor: pointer;
+  min-width: 320px;
+}
+
+#game-select:focus {
+  outline: none;
+  border-color: #888;
+}
+
+#chart-container {
+  width: 100%;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+
+.chart-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.chart-header .date {
+  font-size: 13px;
+  color: #888;
+}
+
+.flow-chart-wrapper {
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  padding: 12px 8px 0 8px;
+}
+
+.gridline {
+  stroke: #e8e8e8;
+  stroke-width: 0.5;
+}
+
+.yard-label {
+  font-size: 9px;
+  fill: #bbb;
+  font-weight: 400;
+}
+
+.team-label {
+  font-size: 9px;
+  fill: #999;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.drive-line {
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.drive-dot {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.drive-result-label {
+  font-size: 8px;
+  font-weight: 400;
+  text-anchor: middle;
+}
+
+.exchange-curve {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1;
+  stroke-dasharray: 3,3;
+}
+
+.exchange-circle {
+  fill: #fff;
+  stroke: #ccc;
+  stroke-width: 1;
+}
+
+.exchange-label {
+  font-size: 7.5px;
+  fill: #bbb;
+  text-anchor: middle;
+  font-weight: 400;
+}
+
+.score-label {
+  font-size: 9px;
+  fill: #2c3e6b;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.scoring-annotation {
+  font-size: 9px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.half-divider {
+  stroke: #ddd;
+  stroke-width: 1;
+  stroke-dasharray: 4,3;
+}
+
+.ticker-text {
+  font-size: 8px;
+  fill: #999;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticker-text.score-changed {
+  fill: #2c3e6b;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.ticker-label {
+  font-size: 8px;
+  fill: #777;
+  font-weight: 600;
+}
+
+.summary-section {
+  display: flex;
+  gap: 32px;
+  margin-top: 16px;
+  padding: 0 4px;
+}
+
+.summary-panel {
+  flex: 1;
+}
+
+.summary-panel h2 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #1a1a1a;
+}
+
+.summary-row {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.summary-row text {
+  font-size: 8.5px;
+  fill: #555;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-row text.col-yards {
+  font-weight: 600;
+}
+
+.summary-row text.col-result {
+  font-weight: 600;
+}
+
+.summary-row.garbage {
+  opacity: 0.3;
+}
+
+.summary-bar {
+  transition: opacity 0.2s;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(30, 30, 30, 0.92);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 280px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 100;
+}
+
+.tooltip.visible {
+  opacity: 1;
+}
+
+.export-btn {
+  display: none;
+  margin: 10px 0 0 auto;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #666;
+  cursor: pointer;
+}
+
+.export-btn:hover {
+  background: #eee;
+  color: #333;
+}
+
+.dimmed {
+  opacity: 0.15 !important;
+}
+
+.highlighted {
+  opacity: 1 !important;
+}
