@@ -102,6 +102,12 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
       'Fumble Recovery (Own)', 'Blocked Field Goal',
       'Blocked Punt',
     ]);
+    // On a turnover, ESPN's end.yardsToEndzone reflects the *new* possessor's
+    // perspective (e.g. ASU at own 8 = 92). We need the drive end from the
+    // *offensive* team's perspective, so use start for the last play.
+    // (PUNT excluded: we skip the punt play and use the prior play's end.)
+    const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE']);
+    const isTurnover = turnoverResults.has(drive.result || '');
     for (let i = plays.length - 1; i >= 0; i--) {
       const p = plays[i];
       const ptype = (p.type && p.type.text) || '';
@@ -110,9 +116,13 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
         const yte = (p.start && p.start.yardsToEndzone) || 0;
         if (yte > 0) return yte;
       } else {
-        let yte = (p.end && p.end.yardsToEndzone) || 0;
-        if (yte > 0) return yte;
-        yte = (p.start && p.start.yardsToEndzone) || 0;
+        let yte;
+        if (isTurnover) {
+          yte = (p.start && p.start.yardsToEndzone) || 0;
+        } else {
+          yte = (p.end && p.end.yardsToEndzone) || 0;
+          if (yte <= 0) yte = (p.start && p.start.yardsToEndzone) || 0;
+        }
         if (yte > 0) return yte;
       }
       break;

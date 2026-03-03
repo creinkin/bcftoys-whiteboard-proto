@@ -24,6 +24,8 @@
   <script src="espn-to-possession.js"></script>
   <script src="possession-flow.js"></script>
   <script>
+    const GAME_PARAM = 'game';
+
     const GAMES = [
       { file: 'data/2024-12-21-notre-dame-indiana.json', label: 'CFP First Round — Notre Dame vs Indiana' },
       { file: 'data/2025-01-02-notre-dame-georgia.json', label: 'CFP Quarterfinal — Notre Dame vs Georgia' },
@@ -36,15 +38,28 @@
     const espnInput = document.getElementById('espn-input');
     const espnLoad = document.getElementById('espn-load');
     const espnStatus = document.getElementById('espn-status');
-    const chartContainer = document.getElementById('chart-container');
 
-    function addGameOption(game, isFetched = false) {
+    function getGameParam() {
+      return new URLSearchParams(location.search).get(GAME_PARAM);
+    }
+
+    function setGameParam(value) {
+      const url = new URL(location.href);
+      if (value) {
+        url.searchParams.set(GAME_PARAM, value);
+      } else {
+        url.searchParams.delete(GAME_PARAM);
+      }
+      history.replaceState({}, '', url.toString());
+    }
+
+    function addGameOption(game, espnId = null) {
       const label = `${game.title} — ${game.teamA.name} vs ${game.teamB.name}`;
       const idx = GAMES.length;
-      GAMES.push({ file: null, label, data: game, isFetched });
+      GAMES.push({ file: null, label, data: game, espnId });
       const opt = document.createElement('option');
       opt.value = idx;
-      opt.textContent = label + (isFetched ? ' (fetched)' : '');
+      opt.textContent = label + (espnId ? ' (fetched)' : '');
       sel.appendChild(opt);
       sel.value = idx;
       return idx;
@@ -55,8 +70,15 @@
       espnStatus.className = 'status-message' + (type ? ' status-' + type : '');
     }
 
+    function getUrlKey(g) {
+      return g.espnId || g.file || null;
+    }
+
     function loadGame(idx) {
       const g = GAMES[idx];
+      const key = getUrlKey(g);
+      if (key) setGameParam(key);
+
       if (g.data) {
         renderPossessionFlow('#chart-container', g.data);
       } else {
@@ -67,18 +89,19 @@
       }
     }
 
-    async function loadFromESPN() {
-      const input = espnInput.value.trim();
-      if (!input) {
+    async function loadFromESPN(input) {
+      const raw = (input || espnInput.value || '').toString().trim();
+      if (!raw) {
         showStatus('Enter an ESPN game URL or ID', 'error');
         return;
       }
+      const gameId = espnToPossession.extractGameId(raw);
       espnLoad.disabled = true;
       showStatus('Fetching game data…', 'loading');
       try {
-        const game = await espnToPossession.fetchAndConvert(input);
+        const game = await espnToPossession.fetchAndConvert(gameId);
         showStatus('');
-        addGameOption(game, true);
+        addGameOption(game, gameId);
         loadGame(GAMES.length - 1);
       } catch (err) {
         showStatus('Error: ' + (err.message || 'Could not fetch game. Try a different URL or check CORS.'), 'error');
@@ -95,10 +118,26 @@
     });
 
     sel.addEventListener('change', () => loadGame(+sel.value));
-    espnLoad.addEventListener('click', loadFromESPN);
+    espnLoad.addEventListener('click', () => loadFromESPN());
     espnInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') loadFromESPN(); });
 
-    loadGame(0);
+    (function init() {
+      const param = getGameParam();
+      if (param) {
+        if (/^\d+$/.test(param)) {
+          loadFromESPN(param);
+          return;
+        }
+        const idx = GAMES.findIndex(g => g.file === param);
+        if (idx >= 0) {
+          sel.value = idx;
+          loadGame(idx);
+          return;
+        }
+      }
+      setGameParam(getUrlKey(GAMES[0]));
+      loadGame(0);
+    })();
   </script>
 </body>
 </html>
