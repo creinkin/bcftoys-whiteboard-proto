@@ -111,9 +111,19 @@ function getDriveYte(drive, pos, possTeamId, home, away) {
     // ESPN returns "MISSED FG" in drive.result, not "FGA".
     const turnoverResults = new Set(['DOWNS', 'INT', 'FUMBLE', 'FGA', 'MISSED FG']);
     const isTurnover = turnoverResults.has(drive.result || '');
+    const halfEndResults = new Set(['END OF HALF', 'END OF GAME']);
+    const isHalfEnd = halfEndResults.has(drive.result || '');
     for (let i = plays.length - 1; i >= 0; i--) {
       const p = plays[i];
       const ptype = (p.type && p.type.text) || '';
+      // For END OF HALF/GAME, the clock-expiration play has the true end position.
+      // Use its start (ball position when clock hit 0) instead of skipping it.
+      // ESPN uses "End Period" for end-of-half (not "End of Half").
+      if (isHalfEnd && (ptype === 'End of Half' || ptype === 'End of Game' || ptype === 'End Period')) {
+        const yte = (p.start && p.start.yardsToEndzone) || 0;
+        if (yte > 0) return yte;
+        break;
+      }
       if (skipEnd.has(ptype)) continue;
       if (p.scoringPlay) {
         const yte = (p.start && p.start.yardsToEndzone) || 0;
