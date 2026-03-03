@@ -1,0 +1,32 @@
+{
+  "date": "2026-01-19",
+  "title": "CFP National Championship",
+  "teamA": { "name": "Indiana", "abbrev": "Ind", "color": "#990000", "role": "winner" },
+  "teamB": { "name": "Miami", "abbrev": "Mia", "color": "#F47321", "role": "loser" },
+  "finalScore": { "winner": 27, "loser": 21 },
+  "possessions": [
+    { "gp": 1,  "team": "Miami",   "opponent": "Indiana", "half": 1, "type": "Off Drive", "sy": 72, "ey": 52, "plays": 5,  "yards": 20,  "result": "P",   "winnerScore": 0,  "loserScore": 0,  "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 2,  "team": "Indiana", "opponent": "Miami",   "half": 1, "type": "Off Drive", "sy": 95, "ey": 82, "plays": 4,  "yards": 13,  "result": "P",   "winnerScore": 0,  "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 3,  "team": "Miami",   "opponent": "Indiana", "half": 1, "type": "Off Drive", "sy": 77, "ey": 72, "plays": 3,  "yards": 5,   "result": "P",   "winnerScore": 0,  "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 4,  "team": "Indiana", "opponent": "Miami",   "half": 1, "type": "Off Drive", "sy": 71, "ey": 16, "plays": 12, "yards": 55,  "result": "3",   "winnerScore": 3,  "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 5,  "team": "Miami",   "opponent": "Indiana", "half": 1, "type": "Off Drive", "sy": 74, "ey": 81, "plays": 3,  "yards": -7,  "result": "P",   "winnerScore": 3,  "loserScore": 0,  "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 6,  "team": "Indiana", "opponent": "Miami",   "half": 1, "type": "Off Drive", "sy": 73, "ey": 74, "plays": 3,  "yards": -1,  "result": "P",   "winnerScore": 3,  "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 7,  "team": "Miami",   "opponent": "Indiana", "half": 1, "type": "Off Drive", "sy": 69, "ey": 61, "plays": 3,  "yards": 8,   "result": "P",   "winnerScore": 3,  "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 8,  "team": "Indiana", "opponent": "Miami",   "half": 1, "type": "Off Drive", "sy": 85, "ey": 0,  "plays": 14, "yards": 85,  "result": "7",   "winnerScore": 10, "loserScore": 0,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 9,  "team": "Miami",   "opponent": "Indiana", "half": 1, "type": "Off Drive", "sy": 75, "ey": 32, "plays": 9,  "yards": 43,  "result": "N",   "winnerScore": 10, "loserScore": 0,  "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 10, "team": "Indiana", "opponent": "Miami",   "half": 1, "type": "Off Drive", "sy": 68, "ey": 50, "plays": 3,  "yards": 18,  "result": "H",   "winnerScore": 10, "loserScore": 0,  "exchangeType": "Downs", "isGarbage": false },
+    { "gp": 11, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 75, "ey": 69, "plays": 6,  "yards": 6,   "result": "P",   "winnerScore": 10, "loserScore": 0,  "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 12, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 62, "ey": 0,  "plays": 2,  "yards": 62,  "result": "7",   "winnerScore": 10, "loserScore": 7,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 13, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 75, "ey": 53, "plays": 4,  "yards": 22,  "result": "P",   "winnerScore": 10, "loserScore": 7,  "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 14, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 88, "ey": 87, "plays": 3,  "yards": 1,   "result": "P",   "winnerScore": 10, "loserScore": 7,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 15, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 57, "ey": 59, "plays": 3,  "yards": -2,  "result": "P",   "winnerScore": 10, "loserScore": 7,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 16, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 93, "ey": 84, "plays": 3,  "yards": 9,   "result": "P",   "winnerScore": 10, "loserScore": 7,  "exchangeType": "P",   "isGarbage": false },
+    { "gp": 17, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "ST Poss",  "sy": null, "ey": null, "plays": null, "yards": null, "result": "7", "winnerScore": 17, "loserScore": 7, "exchangeType": "Punt Block", "isGarbage": false },
+    { "gp": 18, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 81, "ey": 0,  "plays": 10, "yards": 81,  "result": "7",   "winnerScore": 17, "loserScore": 14, "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 19, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 75, "ey": 0,  "plays": 12, "yards": 75,  "result": "7",   "winnerScore": 24, "loserScore": 14, "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 20, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 91, "ey": 0,  "plays": 8,  "yards": 91,  "result": "7",   "winnerScore": 24, "loserScore": 21, "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 21, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 75, "ey": 17, "plays": 11, "yards": 58,  "result": "3",   "winnerScore": 27, "loserScore": 21, "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 22, "team": "Miami",   "opponent": "Indiana", "half": 2, "type": "Off Drive", "sy": 75, "ey": 41, "plays": 5,  "yards": 34,  "result": "I",   "winnerScore": 27, "loserScore": 21, "exchangeType": "KO",  "isGarbage": false },
+    { "gp": 23, "team": "Indiana", "opponent": "Miami",   "half": 2, "type": "Off Drive", "sy": 94, "ey": 98, "plays": 2,  "yards": -4,  "result": "H",   "winnerScore": 27, "loserScore": 21, "exchangeType": "Int", "isGarbage": true }
+  ]
+}

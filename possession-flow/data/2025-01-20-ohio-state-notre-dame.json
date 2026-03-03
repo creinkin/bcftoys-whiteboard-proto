@@ -1,0 +1,26 @@
+{
+  "date": "2025-01-20",
+  "title": "CFP National Championship",
+  "teamA": { "name": "Ohio State", "abbrev": "OSU", "color": "#BB0000", "role": "winner" },
+  "teamB": { "name": "Notre Dame", "abbrev": "ND", "color": "#0C2340", "role": "loser" },
+  "finalScore": { "winner": 34, "loser": 23 },
+  "possessions": [
+    { "gp": 1,  "team": "Notre Dame", "opponent": "Ohio State", "half": 1, "type": "Off Drive", "sy": 75, "ey": 0,  "plays": 18, "yards": 75,  "result": "7",   "winnerScore": 0,  "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 2,  "team": "Ohio State", "opponent": "Notre Dame", "half": 1, "type": "Off Drive", "sy": 75, "ey": 0,  "plays": 11, "yards": 75,  "result": "7",   "winnerScore": 7,  "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 3,  "team": "Notre Dame", "opponent": "Ohio State", "half": 1, "type": "Off Drive", "sy": 75, "ey": 80, "plays": 3,  "yards": -5,  "result": "P",   "winnerScore": 7,  "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 4,  "team": "Ohio State", "opponent": "Notre Dame", "half": 1, "type": "Off Drive", "sy": 76, "ey": 0,  "plays": 10, "yards": 76,  "result": "7",   "winnerScore": 14, "loserScore": 7,  "exchangeType": "P",      "isGarbage": false },
+    { "gp": 5,  "team": "Notre Dame", "opponent": "Ohio State", "half": 1, "type": "Off Drive", "sy": 75, "ey": 74, "plays": 3,  "yards": 1,   "result": "P",   "winnerScore": 14, "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 6,  "team": "Ohio State", "opponent": "Notre Dame", "half": 1, "type": "Off Drive", "sy": 80, "ey": 0,  "plays": 12, "yards": 80,  "result": "7",   "winnerScore": 21, "loserScore": 7,  "exchangeType": "P",      "isGarbage": false },
+    { "gp": 7,  "team": "Notre Dame", "opponent": "Ohio State", "half": 1, "type": "Off Drive", "sy": 75, "ey": 68, "plays": 1,  "yards": 7,   "result": "H",   "winnerScore": 21, "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 8,  "team": "Ohio State", "opponent": "Notre Dame", "half": 2, "type": "Off Drive", "sy": 75, "ey": 0,  "plays": 5,  "yards": 75,  "result": "7",   "winnerScore": 28, "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 9,  "team": "Notre Dame", "opponent": "Ohio State", "half": 2, "type": "Off Drive", "sy": 75, "ey": 67, "plays": 4,  "yards": 8,   "result": "N",   "winnerScore": 28, "loserScore": 7,  "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 10, "team": "Ohio State", "opponent": "Notre Dame", "half": 2, "type": "Off Drive", "sy": 33, "ey": 28, "plays": 6,  "yards": 5,   "result": "3",   "winnerScore": 31, "loserScore": 7,  "exchangeType": "Downs",  "isGarbage": false },
+    { "gp": 11, "team": "Notre Dame", "opponent": "Ohio State", "half": 2, "type": "Off Drive", "sy": 75, "ey": 0,  "plays": 10, "yards": 75,  "result": "7",   "winnerScore": 31, "loserScore": 15, "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 12, "team": "Ohio State", "opponent": "Notre Dame", "half": 2, "type": "Off Drive", "sy": 75, "ey": 21, "plays": 6,  "yards": 54,  "result": "F",   "winnerScore": 31, "loserScore": 15, "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 13, "team": "Notre Dame", "opponent": "Ohio State", "half": 2, "type": "Off Drive", "sy": 79, "ey": 9,  "plays": 12, "yards": 70,  "result": "FGA", "winnerScore": 31, "loserScore": 15, "exchangeType": "Fumble",  "isGarbage": false },
+    { "gp": 14, "team": "Ohio State", "opponent": "Notre Dame", "half": 2, "type": "Off Drive", "sy": 80, "ey": 61, "plays": 5,  "yards": 19,  "result": "P",   "winnerScore": 31, "loserScore": 15, "exchangeType": "FGA",    "isGarbage": false },
+    { "gp": 15, "team": "Notre Dame", "opponent": "Ohio State", "half": 2, "type": "Off Drive", "sy": 80, "ey": 0,  "plays": 6,  "yards": 80,  "result": "7",   "winnerScore": 31, "loserScore": 23, "exchangeType": "P",      "isGarbage": false },
+    { "gp": 16, "team": "Ohio State", "opponent": "Notre Dame", "half": 2, "type": "Off Drive", "sy": 76, "ey": 15, "plays": 9,  "yards": 61,  "result": "3",   "winnerScore": 34, "loserScore": 23, "exchangeType": "KO",     "isGarbage": false },
+    { "gp": 17, "team": "Notre Dame", "opponent": "Ohio State", "half": 2, "type": "Off Drive", "sy": 75, "ey": 60, "plays": 2,  "yards": 15,  "result": "H",   "winnerScore": 34, "loserScore": 23, "exchangeType": "KO",     "isGarbage": true }
+  ]
+}
