@@ -328,6 +328,50 @@ function renderPossessionFlow(containerSelector, gameData) {
   // ============ DRIVE SUMMARY TABLES ============
   const summDiv = container.append('div').attr('class', 'summary-section');
 
+  // Draws a field-position arrow in the summary table using a fixed 3-slot layout:
+  //   [left-arrow slot (8px)] [number slot (13px, right-aligned)] [right-arrow slot (7px)]
+  // This keeps all columns perfectly aligned regardless of which slots are occupied.
+  // x, y  = cell left-edge x and text-baseline y within the row group
+  // sy    = yards from opponent end zone (0 = end zone, 50 = midfield, >50 = own territory)
+  // color = fill color for both arrow and number; bold = bold the yard number
+  function drawSummaryArrow(g, x, y, sy, color, bold) {
+    const aw = 5;     // arrow polygon width
+    const ah = 4;     // arrow half-height
+    const aSlot = 8;  // reserved width for each arrow slot
+    const nSlot = 13; // reserved width for the number (right-aligned within it)
+    const cy = y - 3; // vertical center of arrow relative to text baseline
+    const fw = bold ? '700' : '400';
+
+    // Fixed x anchors
+    const lArrowX  = x;                    // left arrow tip
+    const numEndX  = x + aSlot + nSlot;    // right edge of number slot (text-anchor=end)
+    const rArrowX  = x + aSlot + nSlot + 1; // left edge of right arrow
+
+    const drawLeftArrow = () =>
+      g.append('polygon')
+        .attr('points', `${lArrowX},${cy} ${lArrowX+aw},${cy-ah} ${lArrowX+aw},${cy+ah}`)
+        .attr('fill', color);
+
+    const drawRightArrow = () =>
+      g.append('polygon')
+        .attr('points', `${rArrowX},${cy-ah} ${rArrowX},${cy+ah} ${rArrowX+aw},${cy}`)
+        .attr('fill', color);
+
+    const drawNum = (txt) =>
+      g.append('text').attr('x', numEndX).attr('y', y)
+        .attr('text-anchor', 'end').attr('fill', color).attr('font-weight', fw).text(txt);
+
+    if (sy === 0) {
+      drawRightArrow(); // end zone: right arrow only
+    } else if (sy > 50) {
+      drawLeftArrow(); drawNum(100 - sy); // own territory: ◄ + own-yard
+    } else if (sy < 50) {
+      drawNum(sy); drawRightArrow();      // opponent territory: yard + ►
+    } else {
+      drawNum('50');                      // midfield: number only
+    }
+  }
+
   [teamA, teamB].forEach(team => {
     const drives = possessions.filter(p => p.team === team.name && p.type === 'Off Drive');
     const panel = summDiv.append('div').attr('class', 'summary-panel');
@@ -388,20 +432,14 @@ function renderPossessionFlow(containerSelector, gameData) {
         g.append('text').attr('x', col.gp).attr('y', 0).text(p.gp);
         g.append('text').attr('x', col.dr).attr('y', 0).text(dNum);
 
-        // Start field position
-        g.append('text').attr('x', col.st).attr('y', 0).text(fldStr(p.sy));
+        // Start field position — always neutral grey arrow
+        drawSummaryArrow(g, col.st, 0, p.sy, '#999', false);
 
-        // End field position
-        if (p.yards < 0) {
-          g.append('text').attr('x', col.en).attr('y', 0).attr('fill', C.negative).text(fldStrNeg(p.ey));
-        } else {
-          const endTxt = fldStr(p.ey);
-          const isScore = p.result === '7' || p.result === '3';
-          g.append('text').attr('x', col.en).attr('y', 0)
-            .attr('fill', isScore ? C.scoring : '#555')
-            .attr('font-weight', isScore ? '700' : '400')
-            .text(endTxt);
-        }
+        // End field position — arrow colored by drive result
+        const isTD = p.result === '7';
+        const isFG = p.result === '3';
+        const eColor = isTD ? C.scoring : (isFG ? C.fg : (p.yards < 0 ? C.negative : '#888'));
+        drawSummaryArrow(g, col.en, 0, p.ey, eColor, isTD || isFG);
 
         g.append('text').attr('x', col.pl).attr('y', 0).text(p.plays);
 
