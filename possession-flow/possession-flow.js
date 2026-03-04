@@ -13,10 +13,12 @@ function renderPossessionFlow(containerSelector, gameData) {
   const h2First = possessions.find(p => p.half === 2);
   const fieldWidthWithGap = fieldWidth + (h2First ? halfGap : 0);
   const fieldHeight = 340;
+  const endZoneH = 33;
   const tickerRowHeight = 13;
   const tickerPad = 12;
   const chartW = margin.left + fieldWidthWithGap + margin.right;
-  const chartH = margin.top + fieldHeight + tickerPad + tickerRowHeight * 4 + 24;
+  const chartH = margin.top + endZoneH * 2 + fieldHeight + tickerPad + tickerRowHeight * 4 + 24;
+  const gL = margin.left - 6, gR = margin.left + fieldWidthWithGap + 6;
 
   const C = {
     scoring: '#2c3e6b',
@@ -35,7 +37,7 @@ function renderPossessionFlow(containerSelector, gameData) {
   function chartY(sy, team) {
     return team === teamA.name ? sy : 100 - sy;
   }
-  const yS = d3.scaleLinear().domain([0, 100]).range([margin.top, margin.top + fieldHeight]);
+  const yS = d3.scaleLinear().domain([0, 100]).range([margin.top + endZoneH, margin.top + endZoneH + fieldHeight]);
   const xGP = gp => {
     let x = margin.left + (gp - 1) * colWidth + colWidth / 2;
     if (h2First && gp >= h2First.gp) x += halfGap;
@@ -83,10 +85,78 @@ function renderPossessionFlow(containerSelector, gameData) {
   const wrap = container.append('div').attr('class', 'flow-chart-wrapper').style('position', 'relative');
   const svg = wrap.append('svg').attr('width', chartW).attr('height', chartH).attr('class', 'flow-svg');
 
+  // ---- End zones ----
+  {
+    const defs = svg.append('defs');
+    const strPat = defs.append('pattern')
+      .attr('id', 'ez-stripe-pat')
+      .attr('patternUnits', 'userSpaceOnUse')
+      .attr('width', 16).attr('height', 16)
+      .attr('patternTransform', 'rotate(-45)');
+    strPat.append('line')
+      .attr('x1', 0).attr('y1', 0).attr('x2', 16).attr('y2', 0)
+      .attr('stroke', '#d0d0d0').attr('stroke-width', 1);
+
+    const ezW = gR - gL;
+    [
+      { team: teamA, ezY: margin.top },
+      { team: teamB, ezY: yS(100) }
+    ].forEach(({ team, ezY }) => {
+      const ezG = svg.append('g').attr('class', 'end-zone');
+
+      // White background
+      ezG.append('rect')
+        .attr('x', gL).attr('y', ezY).attr('width', ezW).attr('height', endZoneH)
+        .attr('fill', '#fff');
+
+      // Grey diagonal line overlay
+      ezG.append('rect')
+        .attr('x', gL).attr('y', ezY).attr('width', ezW).attr('height', endZoneH)
+        .attr('fill', 'url(#ez-stripe-pat)');
+
+      // Goal line at the field boundary side of the end zone
+      const glY = team === teamA ? ezY + endZoneH : ezY;
+      ezG.append('line')
+        .attr('x1', gL).attr('x2', gR)
+        .attr('y1', glY).attr('y2', glY)
+        .attr('stroke', '#ccc').attr('stroke-width', 1.5);
+
+      // Team name: letters centered, spanning at most 50% of chart width
+      const name = team.name.toUpperCase();
+      const chars = name.split('');
+      const n = chars.length;
+      // Shift toward the outer edge (away from goal line) to avoid overlapping TD labels
+      const midY = team === teamA
+        ? ezY + endZoneH * 0.3
+        : ezY + endZoneH * 0.7;
+      const maxNameSpan = Math.min(ezW, chartW * 0.5);
+      const nameStartX = gL + ezW / 2 - maxNameSpan / 2;
+      chars.forEach((ch, i) => {
+        if (ch === ' ') return;
+        const lx = nameStartX + (maxNameSpan / n) * (i + 0.5);
+        ezG.append('text')
+          .attr('x', lx).attr('y', midY).attr('dy', '0.35em')
+          .attr('text-anchor', 'middle')
+          .attr('font-family', '"Helvetica Neue", Helvetica, Arial, sans-serif')
+          .attr('font-size', '16').attr('font-weight', '900')
+          .attr('fill', 'rgba(44, 62, 107, 0.32)')
+          .text(ch);
+      });
+    });
+  }
+
+  // ---- Field band stripes (alternating per 10-yard segment) ----
+  for (let v = 0; v < 100; v += 10) {
+    if ((v / 10) % 2 === 0) continue; // only shade odd bands
+    svg.append('rect')
+      .attr('x', gL).attr('y', yS(v))
+      .attr('width', gR - gL).attr('height', yS(v + 10) - yS(v))
+      .attr('fill', 'rgba(0, 0, 0, 0.014)');
+  }
+
   // ---- Field grid ----
   const yardVals = [10, 20, 30, 40, 50, 60, 70, 80, 90];
   const yardTxt = [10, 20, 30, 40, 50, 40, 30, 20, 10];
-  const gL = margin.left - 6, gR = margin.left + fieldWidthWithGap + 6;
 
   yardVals.forEach((v, i) => {
     const y = yS(v);
@@ -95,11 +165,6 @@ function renderPossessionFlow(containerSelector, gameData) {
     svg.append('text').attr('class', 'yard-label').attr('x', gR + 8).attr('y', y + 3).attr('text-anchor', 'start').text(yardTxt[i]);
   });
 
-  // Team direction labels
-  svg.append('text').attr('class', 'team-label').attr('x', margin.left - 14).attr('y', yS(6)).attr('text-anchor', 'end').text(teamA.name);
-  svg.append('text').attr('class', 'team-label').attr('x', margin.left - 10).attr('y', yS(6) + 9).attr('text-anchor', 'end').text('↑');
-  svg.append('text').attr('class', 'team-label').attr('x', margin.left - 14).attr('y', yS(94)).attr('text-anchor', 'end').text(teamB.name);
-  svg.append('text').attr('class', 'team-label').attr('x', margin.left - 10).attr('y', yS(94) + 9).attr('text-anchor', 'end').text('↓');
 
   // ---- Half divider ----
   const h1Last = possessions.filter(p => p.half === 1).slice(-1)[0];
@@ -108,7 +173,7 @@ function renderPossessionFlow(containerSelector, gameData) {
     halfX = (xGP(h1Last.gp) + xGP(h2First.gp)) / 2;
     svg.append('line').attr('class', 'half-divider')
       .attr('x1', halfX).attr('x2', halfX)
-      .attr('y1', margin.top - 4).attr('y2', margin.top + fieldHeight + 4);
+      .attr('y1', yS(0) - 4).attr('y2', yS(100) + 4);
     svg.append('text').attr('class', 'exchange-label')
       .attr('x', halfX).attr('y', yS(42))
       .style('font-size', '8px').text('Half');
@@ -182,8 +247,12 @@ function renderPossessionFlow(containerSelector, gameData) {
     const midX = (x1 + x2) / 2;
 
     if (curr.exchangeType === 'KO') {
-      // Kickoff: KO waypoint, then curve to next drive
-      const koChartPos = chartY(65, prev.team);
+      // Kickoff: KO waypoint, then curve to next drive.
+      // The kicker is curr.opponent (the team that scored and kicked off to curr.team).
+      // Using curr.opponent (not prev.team) correctly handles cases where the defensive
+      // team scored (e.g. fumble return TD), meaning the same offensive team appears in
+      // back-to-back possessions and prev.team would point to the wrong side.
+      const koChartPos = chartY(65, curr.opponent);
       const koY = yS(koChartPos);
 
       // KO circle + label
@@ -278,7 +347,7 @@ function renderPossessionFlow(containerSelector, gameData) {
   });
 
   // ============ SCORE TICKER ============
-  const tY = margin.top + fieldHeight + tickerPad;
+  const tY = margin.top + endZoneH * 2 + fieldHeight + tickerPad;
   const tLabelX = 4;
 
   // Row labels
